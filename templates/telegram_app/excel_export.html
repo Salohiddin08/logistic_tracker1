@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Excel Export{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <!-- Content Header -->
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1><i class="fas fa-file-excel text-success"></i> Excel Export</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item active">Excel Export</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-6">
+                    <!-- Excel Export Card -->
+                    <div class="card card-success card-outline">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-file-excel"></i>
+                                Ma'lumotlarni Excel formatida yuklash
+                            </h3>
+                        </div>
+                        
+                        <div class="card-body">
+                            <form id="exportForm" method="get" action="{% url 'export_excel' %}">
+                                <div class="form-group">
+                                    <label for="days">
+                                        <i class="far fa-calendar-alt"></i>
+                                        Muddatni tanlang:
+                                    </label>
+                                    <select name="days" id="days" class="form-control form-control-lg" required>
+                                        <option value="">-- Tanlang --</option>
+                                        <option value="1">1 kun</option>
+                                        <option value="7">7 kun (1 hafta)</option>
+                                        <option value="30">30 kun (1 oy)</option>
+                                        <option value="90">90 kun (3 oy)</option>
+                                        <option value="180">180 kun (6 oy)</option>
+                                        <option value="365">365 kun (1 yil)</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-success btn-lg btn-block">
+                                        <i class="fas fa-download"></i> Excel faylni yuklash
+                                    </button>
+                                </div>
+                            </form>
+                            
+                            <hr>
+                            
+                            <!-- JSON Export -->
+                            <div class="text-center">
+                                <p class="text-muted">Yoki JSON formatda:</p>
+                                <button onclick="exportJSON()" class="btn btn-info">
+                                    <i class="fas fa-code"></i> JSON yuklash
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <!-- Info Card -->
+                    <div class="card card-info card-outline">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-info-circle"></i>
+                                Ma'lumot
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <h5><i class="fas fa-check text-success"></i> Excel fayl tarkibi:</h5>
+                            <ul>
+                                <li>Kanal nomi</li>
+                                <li>Xabar matni</li>
+                                <li>Yo'nalish (A → B)</li>
+                                <li>Yuk turi</li>
+                                <li>Transport</li>
+                                <li>To'lov</li>
+                                <li>Telefon raqamlar</li>
+                                <li>Sana va vaqt</li>
+                            </ul>
+                            
+                            <div class="alert alert-info mt-3">
+                                <i class="icon fas fa-info"></i>
+                                <strong>Eslatma:</strong> Fayl yuklanishi bir necha soniya vaqt olishi mumkin.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const daysSelect = document.getElementById('days');
+    const exportForm = document.getElementById('exportForm');
+    const exportBtn = exportForm.querySelector('button[type="submit"]');
+    
+    // Select o'zgarishini kuzatish
+    daysSelect.addEventListener('change', function() {
+        console.log('Tanlangan:', this.value, 'kun');
+        this.style.borderColor = '#28a745';
+        setTimeout(() => {
+            this.style.borderColor = '';
+        }, 300);
+    });
+    
+    // Form submit
+    exportForm.addEventListener('submit', function(e) {
+        const days = daysSelect.value;
+        
+        if (!days) {
+            e.preventDefault();
+            alert('⚠️ Iltimos muddatni tanlang!');
+            daysSelect.focus();
+            return false;
+        }
+        
+        // Loading animation
+        const originalHTML = exportBtn.innerHTML;
+        exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yuklanmoqda...';
+        exportBtn.disabled = true;
+        
+        console.log('📊 Excel export boshlandi:', days, 'kun');
+        
+        // 3 soniyadan keyin qayta tiklash
+        setTimeout(function() {
+            exportBtn.innerHTML = originalHTML;
+            exportBtn.disabled = false;
+        }, 3000);
+    });
+});
+
+// JSON export
+function exportJSON() {
+    const days = document.getElementById('days').value;
+    
+    if (!days) {
+        alert('⚠️ Iltimos muddatni tanlang!');
+        return;
+    }
+    
+    const url = `/export-json/?days=${days}`;
+    window.location.href = url;
+}
+</script>
+
+<style>
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 8px;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.card-success .card-header {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+#days {
+    border: 2px solid #ddd;
+    transition: all 0.3s;
+}
+
+#days:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+    transition: transform 0.2s;
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+</style>
+{% endblock %}

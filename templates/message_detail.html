@@ -1,0 +1,138 @@
+{% extends 'app_base.html' %}
+
+{% block page_title %}Xabar tafsiloti{% endblock page_title %}
+
+{% block page_content %}
+<div class="card card-primary card-outline">
+  <div class="card-header">
+    <h3 class="card-title">
+      <i class="fas fa-envelope-open-text"></i>
+      Xabar tafsiloti
+    </h3>
+  </div>
+  <div class="card-body">
+    <!-- Message Info -->
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="info-box bg-light">
+          <span class="info-box-icon bg-primary">
+            <i class="fas fa-satellite-dish"></i>
+          </span>
+          <div class="info-box-content">
+            <span class="info-box-text">Kanal</span>
+            <span class="info-box-number">{{ message.channel.title }}</span>
+            <small>ID: {{ message.channel.channel_id }}</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="info-box bg-light">
+          <span class="info-box-icon bg-info">
+            <i class="far fa-clock"></i>
+          </span>
+          <div class="info-box-content">
+            <span class="info-box-text">Sana</span>
+            <span class="info-box-number">{{ message.date|date:"d.m.Y H:i" }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Full Text -->
+    <div class="card card-outline card-secondary">
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          <i class="fas fa-align-left"></i>
+          To'liq matn
+        </h5>
+      </div>
+      <div class="card-body">
+        <div style="white-space: pre-wrap; font-size: 1.1em; line-height: 1.8;">
+          {{ message.text|default:"[Matn yo'q]" }}
+        </div>
+      </div>
+      <div class="card-footer">
+        <small class="text-muted">
+          Message ID: <code>{{ message.message_id }}</code>
+          {% if message.sender_name %}
+          | Yuboruvchi: <strong>{{ message.sender_name }}</strong>
+          {% endif %}
+        </small>
+      </div>
+    </div>
+
+    <!-- Shipment Details (if exists) -->
+    {% if shipment %}
+    <div class="card card-outline card-success">
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          <i class="fas fa-truck"></i>
+          Yuk ma'lumotlari
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <table class="table table-sm">
+              <tr>
+                <th width="40%">Qayerdan:</th>
+                <td><strong>{{ shipment.origin|default:"-" }}</strong></td>
+              </tr>
+              <tr>
+                <th>Qayerga:</th>
+                <td><strong>{{ shipment.destination|default:"-" }}</strong></td>
+              </tr>
+              <tr>
+                <th>Yuk turi:</th>
+                <td>{{ shipment.cargo_type|default:"-" }}</td>
+              </tr>
+            </table>
+          </div>
+          <div class="col-md-6">
+            <table class="table table-sm">
+              <tr>
+                <th width="40%">Transport:</th>
+                <td>{{ shipment.truck_type|default:"-" }}</td>
+              </tr>
+              <tr>
+                <th>To'lov:</th>
+                <td>{{ shipment.payment_type|default:"-" }}</td>
+              </tr>
+              <tr>
+                <th>Telefon:</th>
+                <td>
+                  {% if shipment.phone %}
+                    <a href="tel:{{ shipment.phone }}" class="btn btn-sm btn-success">
+                      <i class="fas fa-phone"></i> {{ shipment.phone }}
+                    </a>
+                  {% else %}
+                    -
+                  {% endif %}
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="alert alert-warning">
+      <i class="fas fa-exclamation-triangle"></i>
+      Bu xabar uchun yuk ma'lumotlari parse qilinmagan.
+    </div>
+    {% endif %}
+
+    <!-- Actions -->
+    <div class="mt-4">
+      <a href="{% url 'saved_messages' %}" class="btn btn-default">
+        <i class="fas fa-arrow-left"></i> Xabarlarga qaytish
+      </a>
+      {% if shipment and shipment.origin and shipment.destination %}
+      <a href="{% url 'route_duplicates' message.channel.channel_id %}?origin={{ shipment.origin }}&destination={{ shipment.destination }}" class="btn btn-warning">
+        <i class="fas fa-clone"></i> Shu yo'nalishdagi dublikatlar
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock page_content %}

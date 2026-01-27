@@ -1,0 +1,138 @@
+{% extends 'app_base.html' %}
+
+{% block page_title %}Xabarlar{% endblock page_title %}
+
+{% block page_content %}
+{% now "Y-m-d" as today %}
+
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Saqlangan xabarlar</h3>
+  </div>
+  <div class="card-body">
+    <form method="get">
+      <div class="form-row align-items-end">
+        <div class="form-group col-md-3">
+          <label>Boshlanish sanasi</label>
+          <input type="date" name="date_from" value="{{ date_from }}" class="form-control">
+        </div>
+        <div class="form-group col-md-3">
+          <label>Tugash sanasi</label>
+          <input type="date" name="date_to" value="{{ date_to }}" class="form-control">
+        </div>
+        <div class="form-group col-md-6">
+          <button type="submit" class="btn btn-primary mr-2">Filtrlash</button>
+          <a class="btn btn-default" href="?date_from={{ today }}&date_to={{ today }}">Bugungi xabarlar</a>
+        </div>
+      </div>
+
+      <!-- 1️⃣ TAG SEARCH Input -->
+      <div class="form-row mt-2">
+        <div class="form-group col-md-8">
+          <label>🔍 So'zlar bo'yicha qidirish (TAG)</label>
+          <div class="input-group">
+            <input type="text" name="search" value="{{ search_query }}" class="form-control" placeholder="Masalan: toshkent samarqand buxoro (space bilan ajrating)">
+            <div class="input-group-append">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search"></i> Qidirish
+              </button>
+            </div>
+          </div>
+          {% if search_query %}
+          <small class="text-muted">
+            Qidirilayotgan so'zlar: 
+            {% for kw in keywords %}
+              <span class="badge badge-warning">{{ kw }}</span>
+            {% endfor %}
+          </small>
+          {% endif %}
+        </div>
+        {% if search_query %}
+        <div class="form-group col-md-4 d-flex align-items-end">
+          <a href="{% url 'saved_messages' %}?date_from={{ date_from }}&date_to={{ date_to }}" class="btn btn-secondary">
+            <i class="fas fa-times"></i> Filterni tozalash
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </form>
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover">
+        <thead>
+          <tr>
+            <th>Channel</th>
+            <th>Message ID</th>
+            <th>Sender</th>
+            <th>Matn</th>
+            <th>Sana</th>
+            <th>Amallar</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for m in messages %}
+          <tr>
+            <td>{{ m.channel.title }} ({{ m.channel.channel_id }})</td>
+            <td>{{ m.message_id }}</td>
+            <td>{{ m.sender_name|default:'-' }}</td>
+            <td style="max-width: 520px;">
+              {% if m.highlighted_text %}
+                <!-- 1️⃣ Highlighted text with yellow background -->
+                <div class="text-truncate" style="line-height: 1.6;">
+                  {{ m.highlighted_text|safe }}
+                </div>
+              {% else %}
+                <div class="text-truncate" title="{{ m.text }}">{{ m.text }}</div>
+              {% endif %}
+            </td>
+            <td>{{ m.date }}</td>
+            <td>
+              <!-- 3️⃣ Full view button -->
+              <a href="{% url 'message_detail' m.id %}" class="btn btn-sm btn-info">
+                <i class="fas fa-eye"></i> Ko'rish
+              </a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="text-muted">
+              {% if search_query %}
+                "{{ search_query }}" bo'yicha xabarlar topilmadi.
+              {% else %}
+                Hozircha xabarlar saqlanmagan. Avval kanallardan xabarlarni yuklang.
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if page_obj and page_obj.paginator.num_pages > 1 %}
+      <nav aria-label="Pagination">
+        <ul class="pagination justify-content-center">
+          {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}&date_from={{ date_from }}&date_to={{ date_to }}&search={{ search_query }}">Oldingi</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">Oldingi</span></li>
+          {% endif %}
+
+          <li class="page-item disabled">
+            <span class="page-link">Sahifa {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+          </li>
+
+          {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}&date_from={{ date_from }}&date_to={{ date_to }}&search={{ search_query }}">Keyingi</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">Keyingi</span></li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+  </div>
+</div>
+{% endblock page_content %}

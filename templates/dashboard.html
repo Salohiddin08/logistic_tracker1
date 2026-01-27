@@ -1,0 +1,364 @@
+{% extends 'app_base.html' %}
+
+{% block page_title %}Dashboard{% endblock page_title %}
+
+{% block page_content %}
+<!-- Success/Error Messages -->
+{% if sent %}
+<div class="alert alert-success alert-dismissible fade show">
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+  <i class="icon fas fa-check"></i> Excel fayl muvaffaqiyatli yuborildi!
+</div>
+{% endif %}
+{% if error %}
+<div class="alert alert-danger alert-dismissible fade show">
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+  <i class="icon fas fa-ban"></i> Xatolik: {{ error }}
+</div>
+{% endif %}
+
+<!-- Header Section -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card bg-gradient-primary">
+      <div class="card-body">
+        <h2 class="text-white mb-2">
+          <i class="fas fa-chart-line mr-2"></i>Logistika Dashboard
+        </h2>
+        <p class="text-white-50 mb-0">
+          <i class="far fa-calendar-alt mr-1"></i>{{ today|date:"d F Y, l" }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row">
+  <div class="col-lg-3 col-6">
+    <div class="small-box bg-info">
+      <div class="inner">
+        <h3>{{ total_today }}</h3>
+        <p>Bugungi yuklar</p>
+      </div>
+      <div class="icon">
+        <i class="fas fa-truck"></i>
+      </div>
+      <a href="{% url 'saved_messages' %}?date_from={{ today }}&date_to={{ today }}" class="small-box-footer">
+        Ko'proq <i class="fas fa-arrow-circle-right"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-6">
+    <div class="small-box bg-success">
+      <div class="inner">
+        <h3>{{ top_origins|length }}</h3>
+        <p>Faol yo'nalishlar</p>
+      </div>
+      <div class="icon">
+        <i class="fas fa-map-marked-alt"></i>
+      </div>
+      <a href="{% url 'channels' %}" class="small-box-footer">
+        Batafsil <i class="fas fa-arrow-circle-right"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-6">
+    <div class="small-box bg-warning">
+      <div class="inner">
+        <h3 style="color: white;">{{ top_cargo|length }}</h3>
+        <p style="color: white;">Yuk turlari</p>
+      </div>
+      <div class="icon">
+        <i class="fas fa-boxes"></i>
+      </div>
+      <a href="{% url 'channels' %}" class="small-box-footer" style="color: white;">
+        Batafsil <i class="fas fa-arrow-circle-right"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-6">
+    <div class="small-box bg-danger">
+      <div class="inner">
+        <h3>{{ top_payments|length }}</h3>
+        <p>To'lov usullari</p>
+      </div>
+      <div class="icon">
+        <i class="fas fa-credit-card"></i>
+      </div>
+      <a href="{% url 'channels' %}" class="small-box-footer">
+        Batafsil <i class="fas fa-arrow-circle-right"></i>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Export Section -->
+<div class="row">
+  <div class="col-12">
+    <div class="card card-primary card-outline">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="fas fa-file-excel mr-2"></i>Excel Export
+        </h3>
+      </div>
+      <div class="card-body">
+        <p class="mb-3">Ma'lumotlarni Excel formatida Telegram botga yuborish</p>
+
+        <!-- FORM TO'G'RILANDI - Comment olib tashlandi -->
+        <form method="post" action="{% url 'bot_export' %}" class="form-inline">
+          {% csrf_token %}
+          <div class="form-group mr-3">
+            <label for="days" class="mr-2">Kunlar:</label>
+            <select name="days" id="days" class="form-control">
+              <option value="1">1 kun</option>
+              <option value="3">3 kun</option>
+              <option value="7">7 kun</option>
+              <option value="14">14 kun</option>
+              <option value="30">30 kun</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-paper-plane mr-1"></i>Yuborish
+          </button>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Statistics Section -->
+<div class="row">
+  <!-- Top Origins -->
+  <div class="col-lg-6">
+    <div class="card card-primary card-outline">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="fas fa-map-marker-alt mr-2"></i>Top Boshlang'ich nuqtalar
+        </h3>
+      </div>
+      <div class="card-body">
+        {% if top_origins %}
+          <div class="table-responsive">
+            <table class="table table-sm table-hover">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Shahar</th>
+                  <th class="text-right">Soni</th>
+                  <th class="text-right">%</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in top_origins %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <strong>{{ item.origin|default:"Noma'lum" }}</strong>
+                  </td>
+                  <td class="text-right">
+                    <span class="badge badge-primary">{{ item.total }}</span>
+                  </td>
+                  <td class="text-right">
+                    {% widthratio item.total total_today 100 %}%
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-muted text-center py-3">
+            <i class="fas fa-info-circle mr-1"></i>Ma'lumot topilmadi
+          </p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Destinations -->
+  <div class="col-lg-6">
+    <div class="card card-success card-outline">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="fas fa-map-pin mr-2"></i>Top Manzillar
+        </h3>
+      </div>
+      <div class="card-body">
+        {% if top_destinations %}
+          <div class="table-responsive">
+            <table class="table table-sm table-hover">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Shahar</th>
+                  <th class="text-right">Soni</th>
+                  <th class="text-right">%</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in top_destinations %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <strong>{{ item.destination|default:"Noma'lum" }}</strong>
+                  </td>
+                  <td class="text-right">
+                    <span class="badge badge-success">{{ item.total }}</span>
+                  </td>
+                  <td class="text-right">
+                    {% widthratio item.total total_today 100 %}%
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-muted text-center py-3">
+            <i class="fas fa-info-circle mr-1"></i>Ma'lumot topilmadi
+          </p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <!-- Top Cargo Types -->
+  <div class="col-lg-6">
+    <div class="card card-warning card-outline">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="fas fa-boxes mr-2"></i>Top Yuk turlari
+        </h3>
+      </div>
+      <div class="card-body">
+        {% if top_cargo %}
+          <div class="table-responsive">
+            <table class="table table-sm table-hover">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Yuk turi</th>
+                  <th class="text-right">Soni</th>
+                  <th class="text-right">%</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in top_cargo %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <strong>{{ item.cargo_type|default:"Noma'lum" }}</strong>
+                  </td>
+                  <td class="text-right">
+                    <span class="badge badge-warning">{{ item.total }}</span>
+                  </td>
+                  <td class="text-right">
+                    {% widthratio item.total total_today 100 %}%
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-muted text-center py-3">
+            <i class="fas fa-info-circle mr-1"></i>Ma'lumot topilmadi
+          </p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Payment Types -->
+  <div class="col-lg-6">
+    <div class="card card-danger card-outline">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="fas fa-credit-card mr-2"></i>Top To'lov usullari
+        </h3>
+      </div>
+      <div class="card-body">
+        {% if top_payments %}
+          <div class="table-responsive">
+            <table class="table table-sm table-hover">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>To'lov turi</th>
+                  <th class="text-right">Soni</th>
+                  <th class="text-right">%</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in top_payments %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <strong>{{ item.payment_type|default:"Noma'lum" }}</strong>
+                  </td>
+                  <td class="text-right">
+                    <span class="badge badge-danger">{{ item.total }}</span>
+                  </td>
+                  <td class="text-right">
+                    {% widthratio item.total total_today 100 %}%
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-muted text-center py-3">
+            <i class="fas fa-info-circle mr-1"></i>Ma'lumot topilmadi
+          </p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Links -->
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="fas fa-link mr-2"></i>Tez havolalar
+        </h3>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-3 col-6">
+            <a href="{% url 'channels' %}" class="btn btn-app bg-primary">
+              <i class="fas fa-comments"></i> Kanallar
+            </a>
+          </div>
+          <div class="col-md-3 col-6">
+            <a href="{% url 'saved_messages' %}?date_from={{ today }}&date_to={{ today }}" class="btn btn-app bg-success">
+              <i class="fas fa-envelope"></i> Bugungi xabarlar
+            </a>
+          </div>
+          <div class="col-md-3 col-6">
+            <a href="{% url 'saved_messages' %}" class="btn btn-app bg-warning">
+              <i class="fas fa-inbox"></i> Barcha xabarlar
+            </a>
+          </div>
+          <div class="col-md-3 col-6">
+            <a href="{% url 'bot_export' %}" class="btn btn-app bg-danger">
+              <i class="fas fa-file-excel"></i> Excel Export
+            </a>
+            
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock page_content %}

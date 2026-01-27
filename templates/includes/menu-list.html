@@ -1,0 +1,44 @@
+<ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+
+    <li class="nav-item">
+    <a href="{% url 'dashboard' %}" class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}">
+      <i class="nav-icon fas fa-tachometer-alt"></i>
+      <p>Dashboard</p>
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a href="{% url 'channels' %}" class="nav-link {% if request.path == '/channels/' %}active{% endif %}">
+      <i class="nav-icon fas fa-list"></i>
+      <p>Kanallar</p>
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a href="{% url 'saved_messages' %}" class="nav-link {% if request.path == '/messages/' %}active{% endif %}">
+      <i class="nav-icon far fa-comment-dots"></i>
+      <p>Xabarlar</p>
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a href="{% url 'add_session' %}" class="nav-link {% if request.path == '/add-session/' %}active{% endif %}">
+      <i class="nav-icon fas fa-key"></i>
+      <p>Session qo‘shish</p>
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a href="{% url 'export_json' %}" class="nav-link {% if request.path == '/export-json/' %}active{% endif %}">
+      <i class="nav-icon fas fa-file-export"></i>
+      <p>JSON eksport</p>
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a href="{% url 'logout' %}" class="nav-link">
+      <i class="nav-icon fas fa-sign-out-alt"></i>
+      <p>Chiqish</p>
+    </a>
+  </li>
+</ul>

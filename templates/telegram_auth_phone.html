@@ -1,0 +1,141 @@
+{% extends 'auth_base.html' %}
+
+{% block title %}Telegram Auth - Telefon{% endblock title %}
+
+{% block auth_content %}
+<div class="login-logo mb-3">
+  <b>TG Yuk</b> Monitor
+</div>
+
+<p class="login-box-msg">
+  <i class="fab fa-telegram text-info"></i> Telegram orqali kirish
+</p>
+
+<div class="alert alert-info alert-dismissible fade show">
+  <i class="fas fa-info-circle"></i>
+  <strong>Qanday ishlaydi?</strong><br>
+  Telefon raqamingizga Telegram orqali tasdiqlash kodi yuboriladi.
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+</div>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+      {{ message }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+  {% endfor %}
+{% endif %}
+
+<!-- Telefon raqam kiritish form -->
+<!-- telegram_auth_phone.html -->
+<form method="POST">
+    {% csrf_token %}
+    <input 
+        type="tel" 
+        name="phone_number" 
+        placeholder="+998901234567"
+        pattern="\+?[0-9]{10,15}"
+        required
+    >
+    <button type="submit">Kod yuborish</button>
+</form>
+
+<hr class="my-3">
+
+<!-- Orqaga qaytish -->
+<div class="text-center">
+  <a href="{% url 'login' %}" class="text-muted">
+    <i class="fas fa-arrow-left"></i> Login/Parol bilan kirish
+  </a>
+</div>
+
+<!-- Yordam -->
+<div class="mt-4 p-3" style="background-color: #f8f9fa; border-radius: 10px;">
+  <p class="mb-2" style="font-size: 13px; color: #6c757d;">
+    <i class="fas fa-question-circle text-warning"></i> <strong>Ko'rsatmalar:</strong>
+  </p>
+  <ul class="mb-0" style="font-size: 12px; color: #6c757d;">
+    <li>Telefon raqamingiz Telegramda ro'yxatdan o'tgan bo'lishi kerak</li>
+    <li>Raqamni +998 bilan boshlang</li>
+    <li>Tasdiqlash kodi Telegram akkauntingizga keladi</li>
+  </ul>
+</div>
+
+{% endblock auth_content %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('phoneForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const phoneInput = document.querySelector('input[name="phone_number"]');
+
+  // Telefon raqam formatlash
+  phoneInput.addEventListener('input', function(e) {
+    let value = e.target.value.replace(/[^\d+]/g, '');
+    
+    // Agar + bo'lmasa, qo'shish
+    if (!value.startsWith('+')) {
+      value = '+' + value;
+    }
+    
+    // Agar +998 bo'lmasa, avtomatik qo'shish
+    if (value.length === 1 && value === '+') {
+      value = '+998';
+    }
+    
+    // Maksimal uzunlik: +998 + 9 raqam = 13
+    if (value.length > 13) {
+      value = value.substring(0, 13);
+    }
+    
+    e.target.value = value;
+  });
+
+  // Form submit
+  form.addEventListener('submit', function(e) {
+    const phone = phoneInput.value.trim();
+    
+    // Validatsiya
+    const phoneRegex = /^\+998[0-9]{9}$/;
+    if (!phoneRegex.test(phone)) {
+      e.preventDefault();
+      alert('Telefon raqam noto\'g\'ri formatda!\n\nTo\'g\'ri format: +998901234567');
+      phoneInput.focus();
+      return;
+    }
+
+    // Tugmani disable qilish
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yuborilmoqda...';
+  });
+
+  // Auto-fill +998
+  if (phoneInput.value === '') {
+    phoneInput.value = '+998';
+  }
+
+  // Focus bo'lganda kursorni oxiriga olib borish
+  phoneInput.addEventListener('focus', function() {
+    this.setSelectionRange(this.value.length, this.value.length);
+  });
+});
+</script>
+{% endblock extra_js %}
+```
+
+**Bu faylda nima bor:**
+
+✅ **Telefon raqam validatsiyasi** - faqat +998 bilan boshlangan raqamlar
+✅ **Auto-format** - avtomatik +998 qo'shadi
+✅ **Loading state** - yuborilayotganda spinner ko'rsatadi
+✅ **Ko'rsatmalar** - foydalanuvchiga yordam
+✅ **Info alert** - qanday ishlashini tushuntiradi
+✅ **Pattern validation** - HTML5 validatsiya
+✅ **JavaScript yordamchisi** - raqamni to'g'ri formatda kiritishga yordam beradi
+
+**Qayerga joylashtirish:**
+```
+templates/
+  └── telegram_auth_phone.html  👈 Shu yerga

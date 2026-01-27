@@ -1,0 +1,92 @@
+{% extends 'app_base.html' %}
+
+{% block page_title %}Kanallar{% endblock page_title %}
+
+{% block page_content %}
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Telegram kanallari</h3>
+    <div class="card-tools">
+      <span class="badge badge-info">2️⃣ Kuzatish tizimi faol</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="alert alert-info">
+      <i class="fas fa-info-circle"></i>
+      <strong>Yo'riqnoma:</strong> Faqat yashil belgili (✅) kanallar kuzatiladi va yangi xabarlar avtomatik saqlanadi.
+      Kanal yonidagi tugmani bosib kuzatishni yoqing/o'chiring.
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover">
+        <thead>
+          <tr>
+            <th width="60">Status</th>
+            <th>Kanal nomi</th>
+            <th>Channel ID</th>
+            <th>Amallar</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for c in channels %}
+          <tr class="{% if c.is_tracked %}table-success{% endif %}">
+            <td class="text-center">
+              {% if c.is_tracked %}
+                <span class="badge badge-success" title="Kuzatilmoqda">✅</span>
+              {% else %}
+                <span class="badge badge-secondary" title="Kuzatilmayapti">⏸️</span>
+              {% endif %}
+            </td>
+            <td>
+              <strong>{{ c.title|default:'Nomsiz kanal' }}</strong>
+            </td>
+            <td>
+              <code>{{ c.id }}</code>
+            </td>
+            <td>
+              <!-- 2️⃣ Toggle tracking button -->
+              <form method="post" action="{% url 'toggle_channel_tracking' c.id %}" style="display: inline;">
+                {% csrf_token %}
+                {% if c.is_tracked %}
+                  <button type="submit" class="btn btn-sm btn-warning">
+                    <i class="fas fa-pause"></i> Kuzatishni to'xtatish
+                  </button>
+                {% else %}
+                  <button type="submit" class="btn btn-sm btn-success">
+                    <i class="fas fa-play"></i> Kuzatishni boshlash
+                  </button>
+                {% endif %}
+              </form>
+
+              <a href="{% url 'fetch_messages' c.id %}" class="btn btn-sm btn-primary">
+                <i class="fas fa-download"></i> Xabarlarni yuklash
+              </a>
+
+              <a href="{% url 'channel_stats' c.id %}" class="btn btn-sm btn-info">
+                <i class="fas fa-chart-bar"></i> Statistika
+              </a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="4" class="text-muted text-center">
+              Kanallar topilmadi. Avval session qo'shing.
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card-footer">
+    <a class="btn btn-default" href="{% url 'saved_messages' %}">
+      <i class="far fa-comment-dots mr-1"></i>
+      Saqlangan xabarlar
+    </a>
+    <a class="btn btn-default" href="{% url 'dashboard' %}">
+      <i class="fas fa-home mr-1"></i>
+      Dashboard
+    </a>
+  </div>
+</div>
+{% endblock page_content %}

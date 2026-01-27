@@ -1,0 +1,228 @@
+{% extends 'auth_base.html' %}
+
+{% block title %}Telegram Auth - Kod{% endblock title %}
+
+{% block auth_content %}
+<div class="login-logo mb-3">
+  <b>TG Yuk</b> Monitor
+</div>
+
+<p class="login-box-msg">
+  <i class="fab fa-telegram text-info"></i> Tasdiqlash kodi
+</p>
+
+<div class="alert alert-success alert-dismissible fade show">
+  <i class="fas fa-check-circle"></i>
+  <strong>Kod yuborildi!</strong><br>
+  Telegram akkauntingizga tasdiqlash kodi yuborildi. Kodni kiriting.
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+</div>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+      {{ message }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+  {% endfor %}
+{% endif %}
+
+<!-- Kod kiritish form -->
+<form method="post" id="codeForm">
+  {% csrf_token %}
+
+  <div class="input-group mb-3">
+    <input 
+      type="text" 
+      name="code" 
+      class="form-control text-center" 
+      placeholder="12345" 
+      required 
+      autofocus
+      maxlength="6"
+      pattern="[0-9]{5,6}"
+      title="5 yoki 6 raqamli kod"
+      style="font-size: 1.5rem; font-weight: 600; letter-spacing: 0.3rem;"
+    >
+    <div class="input-group-append">
+      <div class="input-group-text">
+        <span class="fas fa-key"></span>
+      </div>
+    </div>
+  </div>
+
+  <small class="form-text text-muted mb-3 text-center">
+    <i class="fas fa-mobile-alt"></i> 
+    Telegram'dan kelgan 5-6 raqamli kodni kiriting
+  </small>
+
+  <!-- 2FA parol (agar kerak bo'lsa) -->
+  <div class="input-group mb-3" id="passwordGroup" style="display: none;">
+    <input 
+      type="password" 
+      name="password" 
+      class="form-control" 
+      placeholder="2FA parol (agar bor bo'lsa)"
+      id="passwordInput"
+    >
+    <div class="input-group-append">
+      <div class="input-group-text">
+        <span class="fas fa-lock"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-check mb-3" style="display: none;" id="passwordCheckbox">
+    <input type="checkbox" class="form-check-input" id="has2FA">
+    <label class="form-check-label" for="has2FA" style="font-size: 13px;">
+      Ikki bosqichli parolim bor (2FA)
+    </label>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <button type="submit" class="btn btn-info btn-block" id="submitBtn">
+        <i class="fas fa-sign-in-alt"></i> Tasdiqlash
+      </button>
+    </div>
+  </div>
+</form>
+
+<hr class="my-3">
+
+<!-- Qayta yuborish -->
+<div class="text-center mb-3">
+  <button type="button" class="btn btn-sm btn-outline-secondary" id="resendBtn" disabled>
+    <i class="fas fa-redo"></i> Qayta yuborish (<span id="countdown">60</span>s)
+  </button>
+</div>
+
+<!-- Orqaga qaytish -->
+<div class="text-center">
+  <a href="{% url 'telegram_auth_phone' %}" class="text-muted">
+    <i class="fas fa-arrow-left"></i> Raqamni o'zgartirish
+  </a>
+</div>
+
+<!-- Yordam -->
+<div class="mt-4 p-3" style="background-color: #f8f9fa; border-radius: 10px;">
+  <p class="mb-2" style="font-size: 13px; color: #6c757d;">
+    <i class="fas fa-question-circle text-warning"></i> <strong>Muammo bormi?</strong>
+  </p>
+  <ul class="mb-0" style="font-size: 12px; color: #6c757d;">
+    <li>Telegram ilovasini tekshiring - "Login Code Request" xabari bor</li>
+    <li>Kod 5 yoki 6 raqamdan iborat</li>
+    <li>Agar 2FA (ikki bosqichli parol) o'rnatgan bo'lsangiz, uni ham kiriting</li>
+    <li>60 soniyadan keyin qayta yuborish mumkin</li>
+  </ul>
+</div>
+
+{% endblock auth_content %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('codeForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const codeInput = document.querySelector('input[name="code"]');
+  const has2FACheckbox = document.getElementById('has2FA');
+  const passwordGroup = document.getElementById('passwordGroup');
+  const passwordInput = document.getElementById('passwordInput');
+  const passwordCheckboxDiv = document.getElementById('passwordCheckbox');
+  const resendBtn = document.getElementById('resendBtn');
+  const countdownSpan = document.getElementById('countdown');
+
+  // Faqat raqam kiritishga ruxsat berish
+  codeInput.addEventListener('input', function(e) {
+    this.value = this.value.replace(/[^0-9]/g, '');
+  });
+
+  // 2FA checkbox
+  has2FACheckbox.addEventListener('change', function() {
+    if (this.checked) {
+      passwordGroup.style.display = 'flex';
+      passwordInput.required = true;
+    } else {
+      passwordGroup.style.display = 'none';
+      passwordInput.required = false;
+      passwordInput.value = '';
+    }
+  });
+
+  // 2FA checkbox ko'rsatish (agar kerak bo'lsa)
+  setTimeout(function() {
+    passwordCheckboxDiv.style.display = 'block';
+  }, 3000);
+
+  // Form submit
+  form.addEventListener('submit', function(e) {
+    const code = codeInput.value.trim();
+    
+    // Validatsiya
+    if (code.length < 5 || code.length > 6) {
+      e.preventDefault();
+      alert('Kod 5 yoki 6 raqamdan iborat bo\'lishi kerak!');
+      codeInput.focus();
+      return;
+    }
+
+    // Tugmani disable qilish
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Tekshirilmoqda...';
+  });
+
+  // Countdown timer (qayta yuborish uchun)
+  let countdown = 60;
+  const countdownTimer = setInterval(function() {
+    countdown--;
+    countdownSpan.textContent = countdown;
+    
+    if (countdown <= 0) {
+      clearInterval(countdownTimer);
+      resendBtn.disabled = false;
+      resendBtn.innerHTML = '<i class="fas fa-redo"></i> Qayta yuborish';
+    }
+  }, 1000);
+
+  // Qayta yuborish
+  resendBtn.addEventListener('click', function() {
+    if (confirm('Yangi kod yuborilsinmi?')) {
+      this.disabled = true;
+      this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yuborilmoqda...';
+      
+      // Telefon sahifasiga qaytish
+      window.location.href = "{% url 'telegram_auth_phone' %}";
+    }
+  });
+
+  // Auto-submit agar 5-6 raqam kiritilsa
+  codeInput.addEventListener('input', function() {
+    if (this.value.length >= 5 && !has2FACheckbox.checked) {
+      // Auto-submit qilmaslik, faqat tugmani highlight qilish
+      submitBtn.classList.add('pulse');
+      setTimeout(function() {
+        submitBtn.classList.remove('pulse');
+      }, 1000);
+    }
+  });
+});
+</script>
+
+<style>
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.pulse {
+  animation: pulse 0.5s ease-in-out;
+}
+
+/* Kod input animatsiyasi */
+input[name="code"]:focus {
+  box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25) !important;
+  transform: scale(1.02);
+  transition: all 0.2s;
+}
+</style>
+{% endblock extra_js %}

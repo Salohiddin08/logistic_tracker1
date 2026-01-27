@@ -1,0 +1,21 @@
+{% load static %}
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+  <a href="{% url 'channels' %}" class="brand-link">
+    <span class="brand-text font-weight-light">TG Yuk Monitor</span>
+  </a>
+
+  <div class="sidebar">
+    <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+      <div class="image">
+        <i class="fas fa-user-circle fa-2x text-light"></i>
+      </div>
+      <div class="info">
+        <span class="d-block text-light">Telegram panel</span>
+      </div>
+    </div>
+
+    <nav class="mt-2">
+      {% include 'includes/menu-list.html' %}
+    </nav>
+  </div>
+</aside>

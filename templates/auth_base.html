@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Auth{% endblock %} | TG Yuk Monitor</title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <!-- icheck bootstrap -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/icheck-bootstrap/3.0.1/icheck-bootstrap.min.css">
+  <!-- AdminLTE -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css">
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-box {
+      width: 400px;
+    }
+
+    .card {
+      border-radius: 15px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      border: none;
+    }
+
+    .card-body {
+      padding: 2rem;
+    }
+
+    .login-logo {
+      font-size: 2rem;
+      font-weight: 700;
+      text-align: center;
+      color: #495057;
+      margin-bottom: 0;
+    }
+
+    .login-logo b {
+      color: #667eea;
+    }
+
+    .login-box-msg {
+      text-align: center;
+      color: #6c757d;
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .input-group-text {
+      background-color: #f8f9fa;
+      border-left: none;
+    }
+
+    .form-control {
+      border-right: none;
+    }
+
+    .form-control:focus {
+      box-shadow: none;
+      border-color: #ced4da;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      padding: 0.6rem;
+      font-weight: 600;
+      transition: transform 0.2s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-outline-info {
+      border-width: 2px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .btn-outline-info:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(23, 162, 184, 0.3);
+    }
+
+    .alert {
+      border-radius: 10px;
+      border: none;
+    }
+
+    hr {
+      border-top: 2px solid #e9ecef;
+    }
+
+    a {
+      transition: color 0.2s;
+    }
+
+    a:hover {
+      text-decoration: none;
+    }
+
+    .text-muted:hover {
+      color: #667eea !important;
+    }
+
+    /* Telegram button icon */
+    .fab.fa-telegram {
+      font-size: 1.2rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 576px) {
+      .login-box {
+        width: 90%;
+        margin: 1rem;
+      }
+
+      .card-body {
+        padding: 1.5rem;
+      }
+
+      .login-logo {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+
+  {% block extra_css %}{% endblock %}
+</head>
+
+<body class="hold-transition login-page">
+
+<div class="login-box">
+  <div class="card card-outline card-primary">
+    <div class="card-body">
+      {% block auth_content %}
+      <!-- Auth sahifalar bu yerga kiritiladi -->
+      {% endblock %}
+    </div>
+  </div>
+</div>
+
+<!-- jQuery -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/js/bootstrap.bundle.min.js"></script>
+<!-- AdminLTE App -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/js/adminlte.min.js"></script>
+
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

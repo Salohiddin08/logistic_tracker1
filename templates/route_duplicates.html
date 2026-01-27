@@ -1,0 +1,130 @@
+{% extends 'app_base.html' %}
+
+{% block page_title %}Dublikatlar{% endblock page_title %}
+
+{% block page_content %}
+<div class="row">
+  <!-- Summary Cards -->
+  <div class="col-lg-4">
+    <div class="small-box bg-primary">
+      <div class="inner">
+        <h3>{{ total_count }}</h3>
+        <p>Jami xabarlar</p>
+      </div>
+      <div class="icon">
+        <i class="fas fa-envelope"></i>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="small-box bg-success">
+      <div class="inner">
+        <h3>{{ unique_count }}</h3>
+        <p>Unique xabarlar</p>
+      </div>
+      <div class="icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="small-box bg-warning">
+      <div class="inner">
+        <h3>{{ duplicate_count }}</h3>
+        <p>Dublikat xabarlar</p>
+      </div>
+      <div class="icon">
+        <i class="fas fa-clone"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card card-primary card-outline">
+  <div class="card-header">
+    <h3 class="card-title">
+      <i class="fas fa-route"></i>
+      Yo'nalish: <strong>{{ origin }}</strong> → <strong>{{ destination }}</strong>
+    </h3>
+  </div>
+  <div class="card-body">
+    <div class="alert alert-info">
+      <i class="fas fa-info-circle"></i>
+      <strong>Dublikat aniqlash:</strong> Bir xil matnli xabarlar dublikat hisoblanadi.
+      {% if duplicate_count > 0 %}
+        <br>Sariq rangdagi qatorlar dublikat xabarlardir.
+      {% endif %}
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover">
+        <thead>
+          <tr>
+            <th width="60">Status</th>
+            <th>Sana</th>
+            <th>Yuk</th>
+            <th>Transport</th>
+            <th>To'lov</th>
+            <th>Telefon</th>
+            <th>Matn</th>
+            <th>Amallar</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for item in shipments %}
+          <tr class="{% if item.is_duplicate %}table-warning{% else %}table-success{% endif %}">
+            <td class="text-center">
+              {% if item.is_duplicate %}
+                <span class="badge badge-warning" title="Dublikat">
+                  <i class="fas fa-clone"></i>
+                </span>
+              {% else %}
+                <span class="badge badge-success" title="Unique">
+                  <i class="fas fa-check"></i>
+                </span>
+              {% endif %}
+            </td>
+            <td>{{ item.shipment.message.date|date:"d.m.Y H:i" }}</td>
+            <td>{{ item.shipment.cargo_type|default:"-" }}</td>
+            <td>{{ item.shipment.truck_type|default:"-" }}</td>
+            <td>{{ item.shipment.payment_type|default:"-" }}</td>
+            <td>
+              {% if item.shipment.phone %}
+                <a href="tel:{{ item.shipment.phone }}" class="text-primary">
+                  {{ item.shipment.phone }}
+                </a>
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td style="max-width: 400px;">
+              <div class="text-truncate" title="{{ item.shipment.message.text }}">
+                {{ item.shipment.message.text|truncatewords:15 }}
+              </div>
+            </td>
+            <td>
+              <a href="{% url 'message_detail' item.shipment.message.id %}" class="btn btn-sm btn-info">
+                <i class="fas fa-eye"></i>
+              </a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="8" class="text-muted text-center">
+              Bu yo'nalish bo'yicha xabarlar topilmadi.
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Actions -->
+    <div class="mt-4">
+      <a href="{% url 'channel_stats' channel_id %}" class="btn btn-default">
+        <i class="fas fa-arrow-left"></i> Statistikaga qaytish
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock page_content %}

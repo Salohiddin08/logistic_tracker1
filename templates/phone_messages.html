@@ -1,0 +1,73 @@
+{% extends 'app_base.html' %}
+
+{% block page_title %}Telefon xabarlari{% endblock page_title %}
+
+{% block page_content %}
+{% now "Y-m-d" as today %}
+
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Kanal ID: {{ channel_id }} · Telefon: {{ phone|default:'-' }}</h3>
+  </div>
+  <div class="card-body">
+    <form method="get">
+      <input type="hidden" name="phone" value="{{ phone }}">
+      <div class="form-row align-items-end">
+        <div class="form-group col-md-3">
+          <label>Boshlanish sanasi</label>
+          <input type="date" name="date_from" value="{{ date_from }}" class="form-control">
+        </div>
+        <div class="form-group col-md-3">
+          <label>Tugash sanasi</label>
+          <input type="date" name="date_to" value="{{ date_to }}" class="form-control">
+        </div>
+        <div class="form-group col-md-6">
+          <button type="submit" class="btn btn-primary mr-2">Filtrlash</button>
+          <a class="btn btn-default" href="?phone={{ phone }}&date_from={{ today }}&date_to={{ today }}">Bugungi xabarlar</a>
+        </div>
+      </div>
+    </form>
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover">
+        <thead>
+          <tr>
+            <th>Message ID</th>
+            <th>Sana</th>
+            <th>Yo'nalish</th>
+            <th>Yuk</th>
+            <th>Transport</th>
+            <th>To'lov</th>
+            <th>Telefon</th>
+            <th>Matn</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for sh in shipments %}
+          <tr>
+            <td>{{ sh.message.message_id }}</td>
+            <td>{{ sh.message.date }}</td>
+            <td>{{ sh.origin|default:'-' }} → {{ sh.destination|default:'-' }}</td>
+            <td>{{ sh.cargo_type|default:'-' }}</td>
+            <td>{{ sh.truck_type|default:'-' }}</td>
+            <td>{{ sh.payment_type|default:'-' }}</td>
+            <td>{{ sh.phone|default:'-' }}</td>
+            <td style="white-space: pre-wrap; min-width: 360px;">{{ sh.message.text }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="8" class="text-muted">Bu telefon raqami bo'yicha xabarlar topilmadi.</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <a class="btn btn-default" href="{% url 'channel_phones' channel_id %}?date_from={{ date_from }}&date_to={{ date_to }}">
+      <i class="fas fa-arrow-left mr-1"></i>
+      Telefonlar ro'yxati
+    </a>
+    <a class="btn btn-default" href="{% url 'channel_stats' channel_id %}?date_from={{ date_from }}&date_to={{ date_to }}">Statistika</a>
+  </div>
+</div>
+{% endblock page_content %}

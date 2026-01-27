@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parsing Jarayoni</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <meta http-equiv="refresh" content="2">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify_content: center;
+        }
+        .progress-card {
+            max_width: 500px;
+            width: 100%;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="progress-card">
+        <h3 class="mb-4">⏳ Parsing ketmoqda...</h3>
+        
+        <div class="mb-3">
+            <strong>Holat:</strong> 
+            <span class="badge bg-primary">{{ progress.current }} / {{ progress.total }}</span> xabar
+        </div>
+
+        <div class="progress mb-3" style="height: 25px;">
+            {% widthratio progress.current progress.total 100 as percent %}
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                 role="progressbar" 
+                 style="width: {{ percent }}%;" 
+                 aria-valuenow="{{ percent }}" 
+                 aria-valuemin="0" 
+                 aria-valuemax="100">
+                {{ percent }}%
+            </div>
+        </div>
+
+        <p class="text-muted">
+            Hozirgacha <strong>{{ progress.shipments }}</strong> ta yuk topildi.
+        </p>
+        
+        <div class="alert alert-info py-2">
+            <small>Sahifa avtomatik yangilanadi, iltimos yopmang.</small>
+        </div>
+        
+        {% if progress.status == 'error' %}
+            <div class="alert alert-danger mt-3">
+                Xatolik yuz berdi: {{ progress.error }}
+                <br>
+                <a href="{% url 'channel_stats' channel_id %}" class="btn btn-sm btn-danger mt-2">Ortga qaytish</a>
+            </div>
+        {% endif %}
+    </div>
+
+</body>
+</html>

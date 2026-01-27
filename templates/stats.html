@@ -1,0 +1,324 @@
+{% extends 'app_base.html' %}
+
+{% block page_title %}Statistika{% endblock page_title %}
+
+{% block page_content %}
+{% now "Y-m-d" as today %}
+
+<div class="row">
+  <div class="col-lg-3 col-12">
+    <div class="small-box bg-info">
+      <div class="inner">
+        <h3>{{ total_shipments }}</h3>
+        <p>Jami yuk eʼlonlari</p>
+      </div>
+      <div class="icon">
+        <i class="fas fa-truck"></i>
+      </div>
+      <div class="small-box-footer">Kanal ID: {{ channel_id }}</div>
+    </div>
+  </div>
+
+  <div class="col-lg-9 col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Filtrlar</h3>
+      </div>
+      <div class="card-body">
+        <form method="get">
+          <div class="form-row align-items-end">
+            <div class="form-group col-md-3">
+              <label>Boshlanish sanasi</label>
+              <input type="date" name="date_from" value="{{ date_from }}" class="form-control">
+            </div>
+            <div class="form-group col-md-3">
+              <label>Tugash sanasi</label>
+              <input type="date" name="date_to" value="{{ date_to }}" class="form-control">
+            </div>
+            <div class="form-group col-md-6">
+              <button type="submit" class="btn btn-primary mr-2">Filtrlash</button>
+              <a href="?date_from={{ today }}&date_to={{ today }}" class="btn btn-success mr-2">Bugungi yuklar</a>
+              <a href="{% url 'channel_stats_excel' channel_id %}?date_from={{ date_from }}&date_to={{ date_to }}&search={{ request.GET.search }}" class="btn btn-warning mr-2">Excel</a>
+              <a href="{% url 'channel_phones' channel_id %}?date_from={{ date_from }}&date_to={{ date_to }}&search={{ request.GET.search }}" class="btn btn-secondary">Telefonlar</a>
+            </div>
+          </div>
+
+          <!-- Search Input -->
+          <div class="form-row mt-2">
+            <div class="form-group col-md-6">
+              <label>Qidirish</label>
+              <div class="input-group">
+                <input type="text" name="search" value="{{ request.GET.search }}" class="form-control" placeholder="Yo'nalish, yuk, transport yoki to'lov bo'yicha qidirish...">
+                <div class="input-group-append">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Qidirish
+                  </button>
+                </div>
+              </div>
+            </div>
+            {% if request.GET.search %}
+            <div class="form-group col-md-6 d-flex align-items-end">
+              <a href="{% url 'channel_stats' channel_id %}?date_from={{ date_from }}&date_to={{ date_to }}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Filterni tozalash
+              </a>
+            </div>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Jadval bloklari -->
+<div class="row">
+  <div class="col-lg-7">
+    <div class="card card-outline card-primary">
+      <div class="card-header">
+        <h3 class="card-title">A → B yo'nalishlari</h3>
+        <div class="card-tools">
+          <span class="badge badge-warning">4️⃣ Dublikat aniqlash</span>
+        </div>
+      </div>
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Qayerdan</th>
+              <th>Qayerga</th>
+              <th>Soni</th>
+              <th>Amallar</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for r in route_stats %}
+            <tr>
+              <td>{{ r.origin|default:'-' }}</td>
+              <td>{{ r.destination|default:'-' }}</td>
+              <td>
+                <span class="badge badge-primary badge-lg">{{ r.total }} ta yuk</span>
+              </td>
+              <td>
+                <!-- 4️⃣ Dublikatlarni ko'rish tugmasi -->
+                <a href="{% url 'route_duplicates' channel_id %}?origin={{ r.origin }}&destination={{ r.destination }}" class="btn btn-sm btn-warning" title="Dublikatlarni ko'rish">
+                  <i class="fas fa-clone"></i> Dublikatlar
+                </a>
+                <a href="{% url 'channel_route_messages' channel_id %}?origin={{ r.origin }}&destination={{ r.destination }}&date_from={{ date_from }}&date_to={{ date_to }}&search={{ request.GET.search }}" class="btn btn-sm btn-info">
+                  <i class="fas fa-list"></i> Xabarlar
+                </a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4" class="text-muted">
+              {% if request.GET.search %}
+                "{{ request.GET.search }}" bo'yicha yo'nalishlar topilmadi.
+              {% else %}
+                Yo'nalishlar topilmadi.
+              {% endif %}
+            </td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if route_page_obj and route_page_obj.paginator.num_pages > 1 %}
+        <div class="card-footer">
+          <nav>
+            <ul class="pagination pagination-sm mb-0">
+              {% if route_page_obj.has_previous %}
+                <li class="page-item">
+                  <a class="page-link" href="?route_page={{ route_page_obj.previous_page_number }}&date_from={{ date_from }}&date_to={{ date_to }}&search={{ request.GET.search }}">⬅ Oldingi</a>
+                </li>
+              {% else %}
+                <li class="page-item disabled"><span class="page-link">⬅ Oldingi</span></li>
+              {% endif %}
+              <li class="page-item disabled">
+                <span class="page-link">{{ route_page_obj.number }} / {{ route_page_obj.paginator.num_pages }}</span>
+              </li>
+              {% if route_page_obj.has_next %}
+                <li class="page-item">
+                  <a class="page-link" href="?route_page={{ route_page_obj.next_page_number }}&date_from={{ date_from }}&date_to={{ date_to }}&search={{ request.GET.search }}">Keyingi ➡</a>
+                </li>
+              {% else %}
+                <li class="page-item disabled"><span class="page-link">Keyingi ➡</span></li>
+              {% endif %}
+            </ul>
+          </nav>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card card-outline card-info">
+      <div class="card-header">
+        <h3 class="card-title">Yuk turlari</h3>
+      </div>
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Yuk</th>
+              <th>Soni</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for c in cargo_stats %}
+            <tr>
+              <td>{{ c.cargo_type|default:'-' }}</td>
+              <td>
+                <a href="{% url 'channel_cargo_messages' channel_id %}?cargo_type={{ c.cargo_type }}&date_from={{ date_from }}&date_to={{ date_to }}&search={{ request.GET.search }}">{{ c.total }}</a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="2" class="text-muted">
+              {% if request.GET.search %}
+                "{{ request.GET.search }}" bo'yicha yuk turlari topilmadi.
+              {% else %}
+                Yuk turlari topilmadi.
+              {% endif %}
+            </td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if cargo_page_obj and cargo_page_obj.paginator.num_pages > 1 %}
+        <div class="card-footer">
+          <nav>
+            <ul class="pagination pagination-sm mb-0">
+              {% if cargo_page_obj.has_previous %}
+                <li class="page-item">
+                  <a class="page-link" href="?cargo_page={{ cargo_page_obj.previous_page_number }}&date_from={{ date_from }}&date_to={{ date_to }}&search={{ request.GET.search }}">⬅</a>
+                </li>
+              {% endif %}
+              <li class="page-item disabled">
+                <span class="page-link">{{ cargo_page_obj.number }} / {{ cargo_page_obj.paginator.num_pages }}</span>
+              </li>
+              {% if cargo_page_obj.has_next %}
+                <li class="page-item">
+                  <a class="page-link" href="?cargo_page={{ cargo_page_obj.next_page_number }}&date_from={{ date_from }}&date_to={{ date_to }}&search={{ request.GET.search }}">➡</a>
+                </li>
+              {% endif %}
+            </ul>
+          </nav>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="card card-outline card-warning">
+      <div class="card-header">
+        <h3 class="card-title">Transport</h3>
+      </div>
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Transport</th>
+              <th>Soni</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for t in truck_stats %}
+            <tr>
+              <td>{{ t.truck_type|default:'-' }}</td>
+              <td>
+                <a href="{% url 'channel_truck_messages' channel_id %}?truck_type={{ t.truck_type }}&date_from={{ date_from }}&date_to={{ date_to }}&search={{ request.GET.search }}">{{ t.total }}</a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="2" class="text-muted">
+              {% if request.GET.search %}
+                "{{ request.GET.search }}" bo'yicha transport turlari topilmadi.
+              {% else %}
+                Transport turlari topilmadi.
+              {% endif %}
+            </td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if truck_page_obj and truck_page_obj.paginator.num_pages > 1 %}
+        <div class="card-footer">
+          <nav>
+            <ul class="pagination pagination-sm mb-0">
+              {% if truck_page_obj.has_previous %}
+                <li class="page-item">
+                  <a class="page-link" href="?truck_page={{ truck_page_obj.previous_page_number }}&date_from={{ date_from }}&date_to={{ date_to }}&search={{ request.GET.search }}">⬅</a>
+                </li>
+              {% endif %}
+              <li class="page-item disabled">
+                <span class="page-link">{{ truck_page_obj.number }} / {{ truck_page_obj.paginator.num_pages }}</span>
+              </li>
+              {% if truck_page_obj.has_next %}
+                <li class="page-item">
+                  <a class="page-link" href="?truck_page={{ truck_page_obj.next_page_number }}&date_from={{ date_from }}&date_to={{ date_to }}&search={{ request.GET.search }}">➡</a>
+                </li>
+              {% endif %}
+            </ul>
+          </nav>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="card card-outline card-success">
+  <div class="card-header">
+    <h3 class="card-title">To'lov turi</h3>
+  </div>
+  <div class="card-body table-responsive p-0">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>To'lov</th>
+          <th>Soni</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for p in payment_stats %}
+        <tr>
+          <td>{{ p.payment_type|default:'-' }}</td>
+          <td>
+            <a href="{% url 'channel_payment_messages' channel_id %}?payment_type={{ p.payment_type }}&date_from={{ date_from }}&date_to={{ date_to }}&search={{ request.GET.search }}">{{ p.total }}</a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="2" class="text-muted">
+          {% if request.GET.search %}
+            "{{ request.GET.search }}" bo'yicha to'lov maʼlumotlari topilmadi.
+          {% else %}
+            To'lov maʼlumotlari topilmadi.
+          {% endif %}
+        </td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if payment_page_obj and payment_page_obj.paginator.num_pages > 1 %}
+    <div class="card-footer">
+      <nav>
+        <ul class="pagination pagination-sm mb-0">
+          {% if payment_page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?payment_page={{ payment_page_obj.previous_page_number }}&date_from={{ date_from }}&date_to={{ date_to }}&search={{ request.GET.search }}">⬅</a>
+            </li>
+          {% endif %}
+          <li class="page-item disabled">
+            <span class="page-link">{{ payment_page_obj.number }} / {{ payment_page_obj.paginator.num_pages }}</span>
+          </li>
+          {% if payment_page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?payment_page={{ payment_page_obj.next_page_number }}&date_from={{ date_from }}&date_to={{ date_to }}&search={{ request.GET.search }}">➡</a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+  {% endif %}
+</div>
+
+<div class="mt-3">
+  <a class="btn btn-default" href="{% url 'channels' %}"><i class="fas fa-arrow-left mr-1"></i>Kanallarga</a>
+  <a class="btn btn-default" href="{% url 'saved_messages' %}"><i class="far fa-comment-dots mr-1"></i>Xabarlar</a>
+</div>
+
+{% endblock page_content %} 

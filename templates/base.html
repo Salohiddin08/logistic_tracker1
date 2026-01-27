@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}TG Yuk statistika{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #f3f4f6, #ffffff);
+            --card-bg: #ffffff;
+            --accent: #2563eb;
+            --accent-soft: rgba(37, 99, 235, 0.08);
+            --accent-strong: #1d4ed8;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --danger: #b91c1c;
+            --radius-lg: 18px;
+            --shadow-lg: 0 18px 40px rgba(15, 23, 42, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .app-shell {
+            width: 100%;
+            min-height: 100vh;
+            background: radial-gradient(circle at top left, rgba(191, 219, 254, 0.35), transparent 55%),
+                        radial-gradient(circle at bottom right, rgba(254, 226, 226, 0.3), transparent 55%),
+                        #f9fafb;
+            border-radius: 0;
+            box-shadow: none;
+            border: none;
+            overflow: hidden;
+            animation: shellFadeIn 600ms ease-out;
+        }
+
+        @keyframes shellFadeIn {
+            from { opacity: 0; transform: translateY(10px) scale(.99); }
+            to   { opacity: 1; transform: translateY(0)   scale(1); }
+        }
+
+        .app-header {
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(209, 213, 219, 0.9);
+            background: linear-gradient(120deg, #ffffff, #e5edff);
+            backdrop-filter: blur(10px);
+        }
+
+        .app-title {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .app-title-pill {
+            padding: 3px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(56, 189, 248, 0.5);
+            background: radial-gradient(circle at top, var(--accent-soft), transparent);
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .nav {
+            display: flex;
+            gap: 6px;
+            font-size: 13px;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: var(--text-muted);
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            transition: all 160ms ease-out;
+        }
+
+        .nav a:hover {
+            color: var(--accent-strong);
+            border-color: rgba(56, 189, 248, 0.45);
+            background: rgba(15, 23, 42, 0.85);
+            transform: translateY(-1px);
+        }
+
+        .app-body {
+            padding: 22px 24px 26px;
+        }
+
+        .card {
+            border-radius: var(--radius-lg);
+            background: var(--card-bg);
+            border: 1px solid rgba(209, 213, 219, 0.9);
+            box-shadow: var(--shadow-lg);
+            padding: 22px 22px 20px;
+            animation: cardSlideUp 420ms ease-out;
+        }
+
+        @keyframes cardSlideUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        h1, h2, h3 {
+            margin-bottom: 14px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 18px;
+        }
+
+.btn, .link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 999px;
+            padding: 7px 14px;
+            font-size: 13px;
+            border: 1px solid rgba(209, 213, 219, 0.9);
+            background: radial-gradient(circle at top, #eff6ff, #dbeafe);
+            color: #1f2937;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 150ms ease-out;
+        }
+
+        .btn-primary {
+            border-color: rgba(56, 189, 248, 0.9);
+            background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+            color: #0b1120;
+            font-weight: 600;
+            box-shadow: 0 12px 30px rgba(56, 189, 248, 0.35);
+        }
+
+        .btn:hover, .link-btn:hover {
+            transform: translateY(-1px) scale(1.01);
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.7);
+            border-color: var(--accent-strong);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 16px 40px rgba(56, 189, 248, 0.55);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            font-size: 13px;
+        }
+
+        thead {
+            background: radial-gradient(circle at top, rgba(191, 219, 254, 0.6), rgba(243, 244, 246, 0.9));
+        }
+
+        th, td {
+            padding: 9px 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(55, 65, 81, 0.85);
+        }
+
+        th {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: var(--text-muted);
+        }
+
+        tbody tr {
+            transition: background-color 150ms ease-out, transform 120ms ease-out, box-shadow 120ms ease-out;
+        }
+
+        tbody tr:hover {
+            background: #f3f4f6;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(148, 163, 184, 0.4);
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 9px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--text-muted);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+            gap: 16px;
+        }
+
+        .mt-1 { margin-top: 4px; }
+        .mt-2 { margin-top: 8px; }
+        .mt-3 { margin-top: 16px; }
+        .mt-4 { margin-top: 24px; }
+
+        .tag-list {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+            font-size: 12px;
+        }
+
+        .tag-list a {
+            text-decoration: none;
+            color: var(--text-main);
+            border-radius: 999px;
+            padding: 4px 9px;
+            background: #e5edff;
+            border: 1px solid rgba(191, 219, 254, 1);
+            transition: all 140ms ease-out;
+        }
+
+        .tag-list a:hover {
+            background: rgba(56, 189, 248, 0.08);
+            border-color: var(--accent-strong);
+            transform: translateY(-1px);
+        }
+
+        form label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        form input[type="text"],
+        form input[type="number"],
+        form input[type="date"],
+        form input[type="datetime-local"],
+        form textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(209, 213, 219, 0.9);
+            outline: none;
+            background: #ffffff;
+            color: #111827;
+            font-size: 13px;
+            transition: border-color 140ms ease-out, box-shadow 140ms ease-out, background 140ms ease-out;
+        }
+
+        form input::placeholder,
+        form textarea::placeholder {
+            color: #9ca3af;
+        }
+
+        form input:focus,
+        form textarea:focus {
+            border-color: var(--accent-strong);
+            box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.35);
+            background: #ffffff;
+        }
+
+        @media (max-width: 768px) {
+            .app-body { padding: 18px 16px 20px; }
+            .grid-2 { grid-template-columns: minmax(0, 1fr); }
+            .app-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+        }
+    </style> -->
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-900 text-[16px] md:text-[18px]">
+<div class="w-full py-4 px-3 md:px-6 lg:px-10">
+    <header class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-200 pb-3 mb-4 bg-white/80">
+        <div class="flex items-center gap-3 text-2xl md:text-3xl font-semibold">
+            <span>🚚 TG Yuk Monitor</span>
+            <span class="text-xs md:text-sm uppercase tracking-wide rounded-full bg-blue-100 text-blue-800 px-3 py-1">statistika</span>
+        </div>
+        <nav class="flex flex-wrap gap-2 text-sm md:text-base text-slate-600">
+            <a href="/channels/" class="px-3 py-1 rounded-md hover:bg-blue-50 hover:text-blue-700 transition">Kanallar</a>
+            <a href="dashboard.html" class="px-3 py-1 rounded-md hover:bg-blue-50 hover:text-blue-700 transition">Dashboard</a>
+            <a href="/messages/" class="px-3 py-1 rounded-md hover:bg-blue-50 hover:text-blue-700 transition">Xabarlar</a>
+            <a href="/export-json/" class="px-3 py-1 rounded-md hover:bg-blue-50 hover:text-blue-700 transition">JSON eksport</a>
+            {% if user.is_authenticated %}
+                <a href="/logout/" class="px-3 py-1 rounded-md hover:bg-red-50 hover:text-red-600 transition">Chiqish</a>
+            {% else %}
+                <a href="/login/" class="px-3 py-1 rounded-md hover:bg-blue-50 hover:text-blue-700 transition">Kirish</a>
+            {% endif %}
+        </nav>
+    </header>
+    <main class="mt-4">
+        {% block content %}{% endblock %}
+    </main>
+</div>
+</body>
+</html>

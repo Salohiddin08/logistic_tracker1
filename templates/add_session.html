@@ -1,0 +1,39 @@
+{% extends 'app_base.html' %}
+
+{% block page_title %}Session qo‘shish{% endblock page_title %}
+
+{% block page_content %}
+<div class="row">
+  <div class="col-12 col-lg-8">
+    <div class="card card-primary">
+      <div class="card-header">
+        <h3 class="card-title">Telegram Session</h3>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="card-body">
+          <div class="form-group">
+            <label for="api_id">API ID</label>
+            <input id="api_id" type="text" name="api_id" value="{{ default_api_id }}" required class="form-control">
+          </div>
+
+          <div class="form-group">
+            <label for="api_hash">API HASH</label>
+            <input id="api_hash" type="text" name="api_hash" value="{{ default_api_hash }}" required class="form-control">
+          </div>
+
+          <div class="form-group">
+            <label for="string_session">String Session</label>
+            <textarea id="string_session" name="string_session" rows="4" required class="form-control"></textarea>
+            <small class="form-text text-muted">Bu maʼlumotlar faqat serverda saqlanadi.</small>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button type="submit" class="btn btn-primary">Saqlash</button>
+          <a href="{% url 'channels' %}" class="btn btn-default">Kanallarga o‘tish</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock page_content %}

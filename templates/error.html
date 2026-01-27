@@ -1,0 +1,32 @@
+{% extends 'app_base.html' %}
+
+{% block page_title %}Xatolik{% endblock page_title %}
+
+{% block page_content %}
+<div class="row">
+  <div class="col-12 col-lg-8">
+    <div class="alert alert-danger">
+      <h5><i class="icon fas fa-exclamation-triangle"></i> {{ title|default:"Server Error" }}</h5>
+      <div>{{ message|default:"Noma'lum xatolik" }}</div>
+    </div>
+
+    {% if detail %}
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Detail</h3>
+        </div>
+        <div class="card-body">
+          <pre style="white-space: pre-wrap;">{{ detail }}</pre>
+        </div>
+      </div>
+    {% endif %}
+
+    <a class="btn btn-primary" href="{% url 'telegram_phone_login' %}">
+      Qayta login
+    </a>
+    <a class="btn btn-default" href="{% url 'add_session' %}">
+      Session qo‘shish
+    </a>
+  </div>
+</div>
+{% endblock page_content %}
