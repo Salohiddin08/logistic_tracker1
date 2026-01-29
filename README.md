@@ -1,33 +1,32 @@
-# Logistic Tracker
+Content is user-generated and unverified.
+1
+🚚 TG Yuk Monitor
+Telegram'dagi yuk e'lonlari kanallaridan ma'lumot olib, ularni bir joyda ko'rsatadigan web-panel.
+Loyiha Django + Telethon yordamida ishlaydi.
 
-**Logistic Tracker** — bu mahsulotlar va yuklarni kuzatish, jo‘natish va yetkazib berish jarayonlarini boshqarish uchun mo‘ljallangan web-ilova. Ushbu loyiha orqali kompaniyalar o‘z logistika operatsiyalarini avtomatlashtirib, real vaqt rejimida ma’lumotlarni kuzatishi mumkin.
-
----
-
-## Asosiy xususiyatlar
-
-* Mahsulot va jo‘natmalarni qo‘shish, tahrirlash va o‘chirish.
-* Yetkazib berish jarayonini real vaqt rejimida kuzatish.
-* Statistika va hisobotlar yaratish.
-* Foydalanuvchilar uchun qulay va intuitiv interfeys.
-
----
-
-## Texnologiyalar
-
-* **Backend:** Python, Django/Flask (loyihaga mosini yoz)
-* **Frontend:** HTML, CSS, JavaScript, React (agar ishlatilgan bo‘lsa)
-* **Ma’lumotlar bazasi:** PostgreSQL/MySQL/SQLite
-* **API:** REST API orqali ma’lumotlarni boshqarish
-
----
-
-## O‘rnatish
-
-1. Loyihani klonlash:
-
-```bash
-git clone https://github.com/username/logistic_tracker.git
+✨ Yangi Xususiyatlar
+🔍 Barcha sahifalarda qidiruv funksiyasi qo'shildi:
+Kanallar sahifasi - Kanal nomini qidirish
+Xabarlar sahifasi - Matn, kanal, sana bo'yicha qidirish
+Statistika sahifasi - Yo'nalish, yuk turi bo'yicha qidirish
+Telefonlar sahifasi - Telefon raqam bo'yicha qidirish
+Telefon xabarlari - Konkret telefon uchun xabarlarni qidirish
+📋 Asosiy Imkoniyatlar
+✅ Telegram akkauntingiz bilan telefon raqam orqali login
+✅ Kanallar ro'yxatini ko'rish va kerakli kanaldan xabarlarni yuklash
+✅ Xabarlardan yo'nalish (A→B), yuk turi, transport, to'lov va telefonlarni avtomatik ajratib olish
+✅ Qidiruv funksiyasi barcha sahifalarda
+✅ Statistikalar va filtrlar
+✅ Excel eksport
+✅ Telefonlar ro'yxati va ularning xabarlari
+✅ Paginatsiya (har sahifada 20 ta yozuv)
+1. Talablar
+Python 3.10+ (tavsiya)
+Git
+Telegram'da developer akkaunt (API ID / API HASH uchun)
+2. O'rnatish
+bash
+git clone https://github.com/Salohiddin08/logistic_tracker.git
 cd logistic_tracker
 ```
 
@@ -55,33 +54,124 @@ python manage.py migrate
 
 ```bash
 python manage.py runserver
-```
+Brauzerda oching:
 
-6. Brauzer orqali tizimga kirish:
+http://127.0.0.1:8000/ – Login
+http://127.0.0.1:8000/channels/ – Kanallar
+http://127.0.0.1:8000/messages/ – Xabarlar
+http://127.0.0.1:8000/phones/ – Telefonlar
+http://127.0.0.1:8000/admin/ – Django admin
+5. 🔍 Qidiruv Funksiyalari
+5.1. Kanallar sahifasi (/channels/)
+Qidirish: Kanal nomi bo'yicha
+Misol: "Yuk", "Transport", "Logistika"
+5.2. Xabarlar sahifasi (/messages/)
+Qidirish: Xabar matni, yo'nalish
+Filtrlar:
+Kanal bo'yicha
+Sana oralig'i (dan / gacha)
+Misol: "Toshkent", "Samarqand", "meva"
+5.3. Statistika sahifasi (/stats/<channel_id>/)
+Qidirish:
+Yo'nalishlar (Qayerdan/Qayerga)
+Yuk turlari
+Transport turlari
+Filtrlar: Sana oralig'i
+Excel eksport: Statistikani yuklash
+5.4. Telefonlar sahifasi (/phones/)
+Qidirish: Telefon raqam
+Misol: "+998", "90", "123"
+5.5. Telefon xabarlari (/phones/messages/<phone>/)
+Qidirish: Konkret telefon uchun xabar matni
+Ko'rinish: Card layout (yorqin dizayn)
+6. Telegram Login Oqimi
+Telefon raqam - +998... formatida kiriting
+SMS kodi - Telegram'dan kelgan kodni yozing
+2-bosqichli parol - Agar yoqilgan bo'lsa (ixtiyoriy)
+Sessiya saqlash - Keyingi kirishlarda avtomatik login
+7. Paginatsiya
+Barcha sahifalarda 20 tadan yozuv ko'rsatiladi
+⬅ Oldingi / Keyingi ➡ tugmalari
+Sahifa X / Y ko'rsatkichi
+8. Excel Eksport
+Statistika sahifasidan:
 
-```
-http://127.0.0.1:8000
-```
+/stats/<channel_id>/export-excel/
+Tarkibi:
 
----
+Yo'nalishlar (A → B)
+Yuk turlari
+Transport turlari
+To'lov turlari
+9. JSON Eksport
+/export-json/
+Barcha xabarlarni JSON formatda saqlaydi.
 
-## Foydalanish
+10. Fayllar Strukturasi
+logistic_tracker/
+├── telegram_app/
+│   ├── views.py          # Search funksiyalari bilan
+│   ├── models.py         # Database modellari
+│   ├── urls.py           # URL routing
+│   ├── utils.py          # Yordamchi funksiyalar
+│   └── templates/
+│       └── telegram_app/
+│           ├── channels.html          # Kanallar + search
+│           ├── messages.html          # Xabarlar + filter
+│           ├── channel_stats.html     # Statistika + search
+│           ├── phones.html            # Telefonlar + search
+│           └── phone_messages.html    # Telefon xabarlari
+├── config/
+│   ├── settings.py
+│   └── urls.py
+├── manage.py
+├── requirements.txt
+└── .env
+11. Qidiruv Parametrlari (GET)
+Kanallar:
+?search=Yuk
+Xabarlar:
+?search=Toshkent&channel=123&date_from=2024-01-01&date_to=2024-12-31
+Statistika:
+?search=Samarqand&date_from=2024-01-01
+Telefonlar:
+?search=+998
+12. Production Deploy
+bash
+# Debug o'chirish
+DEBUG=False
 
-* Foydalanuvchi hisobini yaratish.
-* Mahsulotlar va jo‘natmalarni qo‘shish.
-* Yetkazib berish jarayonini kuzatish va yangilash.
-* Statistika va hisobotlarni ko‘rish.
+# Static fayllar
+python manage.py collectstatic
 
----
+# Gunicorn bilan ishga tushirish
+gunicorn config.wsgi:application --bind 0.0.0.0:8000
+13. Xavfsizlik
+⚠️ Shaxsiy Telegram akkauntingiz bilan ishlaydi
+⚠️ Telegram ToS qoidalariga rioya qiling
+⚠️ .env faylini GitHub'ga yuklamang
+⚠️ Production'da SECRET_KEY ni o'zgartiring
+14. Muammolarni Hal Qilish
+Sessiya xatosi:
+bash
+python manage.py shell
+from telegram_app.models import TelegramSession
+TelegramSession.objects.all().delete()
+Migration xatosi:
+bash
+python manage.py makemigrations
+python manage.py migrate
+15. Hissa Qo'shish
+Pull request yuborishdan oldin:
 
-## Hissa qo‘shish
+Kodni formatlang (PEP8)
+Test qiling
+README'ni yangilang
+16. Litsenziya
+MIT License
 
-Agar loyiha ochiq bo‘lsa, hissa qo‘shish uchun:
+17. Bog'lanish
+GitHub: @Salohiddin08
+Muammo haqida xabar: Issues
+Loyiha muvaffaqiyatli ishlashi uchun omad tilaymiz! 🚀
 
-1. Fork qiling.
-2. Yangi branch yarating: `git checkout -b feature-name`
-3. O‘zgartirishlar kiritib commit qiling: `git commit -m "Add some feature"`
-4. Branchni push qiling: `git push origin feature-name`
-5. Pull request yuboring
-
----
