@@ -3,7 +3,7 @@ import re
 import threading
 from django.conf import settings
 from django.contrib.auth import logout
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Min, Max
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
@@ -11,6 +11,7 @@ from django.utils.dateparse import parse_date
 from django.core.paginator import Paginator
 from django.views.decorators.http import require_POST
 from asgiref.sync import async_to_sync
+from django.db import models
 
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
@@ -531,6 +532,18 @@ def channel_stats_view(request, channel_id):
     """
     shipments, date_from, date_to = _get_filtered_shipments(request, channel_id)
 
+    # Agar sana tanlanmagan bo'lsa, barcha yuklar oralig'ini ko'rsatish
+    if not date_from and not date_to:
+        # Eng eski va eng yangi xabar sanalarini topish
+        dates = shipments.aggregate(
+            oldest=models.Min('message__date'),
+            newest=models.Max('message__date')
+        )
+        if dates['oldest']:
+            date_from = dates['oldest'].strftime('%Y-%m-%d')
+        if dates['newest']:
+            date_to = dates['newest'].strftime('%Y-%m-%d')
+
     # A → B yo'nalishlar + dublikat hisobi
     route_qs = (
         shipments
@@ -740,7 +753,16 @@ def channel_phone_messages_view(request, channel_id):
 
     phone = request.GET.get('phone') or None
     if phone:
-        shipments = shipments.filter(phone=phone)
+        # Telefon raqamini turli formatlarda qidirish
+        # Masalan: +998901234567, 998901234567, 901234567
+        phone_clean = ''.join(filter(str.isdigit, phone))  # Faqat raqamlar
+        
+        # Turli formatlarda qidirish (OR logic)
+        shipments = shipments.filter(
+            Q(phone__icontains=phone) |  # Asl format
+            Q(phone__icontains=phone_clean) |  # Faqat raqamlar
+            Q(phone__icontains=phone_clean[-9:]) if len(phone_clean) >= 9 else Q()  # Oxirgi 9 ta raqam
+        )
 
     shipments = shipments.select_related('message__channel').order_by('-message__date')
 

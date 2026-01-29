@@ -3,6 +3,48 @@
 {% block page_title %}Telefonlar{% endblock page_title %}
 
 {% block page_content %}
+<div class="row">
+  <!-- Telefon statistikasi -->
+  <div class="col-lg-6 col-12">
+    <div class="small-box bg-success">
+      <div class="inner">
+        <h3>{{ phone_stats|length }}</h3>
+        <p>Jami telefon raqamlar</p>
+      </div>
+      <div class="icon">
+        <i class="fas fa-phone"></i>
+      </div>
+      <div class="small-box-footer">
+        {% if date_from or date_to %}
+          {% if date_from %}{{ date_from }}{% else %}Boshidan{% endif %} — {% if date_to %}{{ date_to }}{% else %}Hozir{% endif %}
+        {% else %}
+          Kanal ID: {{ channel_id }}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ID statistikasi -->
+  <div class="col-lg-6 col-12">
+    <div class="small-box bg-warning">
+      <div class="inner">
+        <h3>{{ id_stats|length }}</h3>
+        <p>Jami ID raqamlar</p>
+      </div>
+      <div class="icon">
+        <i class="fas fa-hashtag"></i>
+      </div>
+      <div class="small-box-footer">
+        {% if date_from or date_to %}
+          {% if date_from %}{{ date_from }}{% else %}Boshidan{% endif %} — {% if date_to %}{{ date_to }}{% else %}Hozir{% endif %}
+        {% else %}
+          Kanal ID: {{ channel_id }}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="card">
   <div class="card-header">
     <h3 class="card-title">Kanal telefonlari (unikal) — Kanal ID: {{ channel_id }}</h3>

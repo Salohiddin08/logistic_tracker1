@@ -7,7 +7,10 @@
 
 <div class="card">
   <div class="card-header">
-    <h3 class="card-title">Kanal ID: {{ channel_id }} · Telefon: {{ phone|default:'-' }}</h3>
+    <h3 class="card-title">
+      Kanal ID: {{ channel_id }} · Telefon: {{ phone|default:'-' }}
+      <span class="badge badge-info ml-2">Jami: {{ shipments.count }} ta xabar</span>
+    </h3>
   </div>
   <div class="card-body">
     <form method="get">
@@ -23,14 +26,15 @@
         </div>
         <div class="form-group col-md-6">
           <button type="submit" class="btn btn-primary mr-2">Filtrlash</button>
-          <a class="btn btn-default" href="?phone={{ phone }}&date_from={{ today }}&date_to={{ today }}">Bugungi xabarlar</a>
+          <a class="btn btn-success" href="?phone={{ phone }}&date_from={{ today }}&date_to={{ today }}">Bugungi xabarlar</a>
         </div>
       </div>
     </form>
 
+    {% if shipments %}
     <div class="table-responsive">
       <table class="table table-bordered table-hover">
-        <thead>
+        <thead class="thead-light">
           <tr>
             <th>Message ID</th>
             <th>Sana</th>
@@ -46,28 +50,41 @@
         {% for sh in shipments %}
           <tr>
             <td>{{ sh.message.message_id }}</td>
-            <td>{{ sh.message.date }}</td>
+            <td>{{ sh.message.date|date:"Y-m-d H:i" }}</td>
             <td>{{ sh.origin|default:'-' }} → {{ sh.destination|default:'-' }}</td>
             <td>{{ sh.cargo_type|default:'-' }}</td>
             <td>{{ sh.truck_type|default:'-' }}</td>
             <td>{{ sh.payment_type|default:'-' }}</td>
             <td>{{ sh.phone|default:'-' }}</td>
-            <td style="white-space: pre-wrap; min-width: 360px;">{{ sh.message.text }}</td>
-          </tr>
-        {% empty %}
-          <tr>
-            <td colspan="8" class="text-muted">Bu telefon raqami bo'yicha xabarlar topilmadi.</td>
+            <td style="white-space: pre-wrap; min-width: 360px;">
+              {% if sh.message.text %}
+                {{ sh.message.text }}
+              {% else %}
+                <span class="text-muted">(Matn yo'q)</span>
+              {% endif %}
+            </td>
           </tr>
         {% endfor %}
         </tbody>
       </table>
     </div>
+    {% else %}
+    <div class="alert alert-warning">
+      <h5>❌ Xabarlar topilmadi</h5>
+      <p class="mb-0">
+        <strong>Telefon:</strong> {{ phone|default:"(telefon ko'rsatilmagan)" }}<br>
+        <strong>Sana oralig'i:</strong> {{ date_from|default:"Boshidan" }} — {{ date_to|default:"Hozir" }}
+      </p>
+    </div>
+    {% endif %}
 
-    <a class="btn btn-default" href="{% url 'channel_phones' channel_id %}?date_from={{ date_from }}&date_to={{ date_to }}">
-      <i class="fas fa-arrow-left mr-1"></i>
-      Telefonlar ro'yxati
-    </a>
-    <a class="btn btn-default" href="{% url 'channel_stats' channel_id %}?date_from={{ date_from }}&date_to={{ date_to }}">Statistika</a>
+    <div class="mt-3">
+      <a class="btn btn-default" href="{% url 'channel_phones' channel_id %}?date_from={{ date_from }}&date_to={{ date_to }}">
+        <i class="fas fa-arrow-left mr-1"></i>
+        Telefonlar ro'yxati
+      </a>
+      <a class="btn btn-default" href="{% url 'channel_stats' channel_id %}?date_from={{ date_from }}&date_to={{ date_to }}">Statistika</a>
+    </div>
   </div>
 </div>
 {% endblock page_content %}
