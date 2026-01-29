@@ -14,7 +14,69 @@ from pathlib import Path
 from decouple import config as env_config
 from pathlib import Path
 from decouple import config
+import os
+import dj_database_url
+from decouple import config
 
+SECRET_KEY = config('SECRET_KEY')
+DEBUG = config('DEBUG', default=False, cast=bool)
+
+# ✅ ALLOWED_HOSTS (to'g'ri format)
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '.fly.dev',  # Barcha *.fly.dev domenlar
+    'logistic-tracker-f0b87937ce4a7d3aa8af754fb5efbbb5b1ff8900.fly.dev',  # To'liq domen
+]
+
+# ✅ CSRF_TRUSTED_ORIGINS (Muhim!)
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.fly.dev',
+    'https://logistic-tracker-f0b87937ce4a7d3aa8af754fb5efbbb5b1ff8900.fly.dev',
+]
+
+# ✅ CSRF_COOKIE settings
+CSRF_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = 'Lax'
+
+# ✅ SESSION settings
+SESSION_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+# Database
+DATABASES = {
+    'default': dj_database_url.config(
+        default=config('DATABASE_URL', default='sqlite:///db.sqlite3'),
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+}
+
+# Static files
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',  # ✅ CSRF middleware
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+# Security settings (production)
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # ✅ Fly.io uchun
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -136,3 +198,4 @@ TELEGRAM_ADMIN_CHAT_ID = env_config('TELEGRAM_ADMIN_CHAT_ID', cast=int, default=
 LOGIN_URL = 'login'
 # Kirgandan keyin asosiy sahifa (session qo'shish / dashboard)
 LOGIN_REDIRECT_URL = '/'
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')

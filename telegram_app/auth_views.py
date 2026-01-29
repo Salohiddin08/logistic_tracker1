@@ -237,6 +237,88 @@ def telegram_auth_code(request):
                 _complete_phone_login(temp_session, phone, code, password, phone_code_hash)
             )
             
+            # ✅ Telegram Session saqlash (TUZATILGAN)
+            api_id = getattr(settings, 'TG_API_ID', '')
+            api_hash = getattr(settings, 'TG_API_HASH', '')
+            
+            # Avval barcha eski sessionlarni o'chirish
+            deleted_count = TelegramSession.objects.all().delete()[0]
+            logger.info(f"🗑️ {deleted_count} ta eski session o'chirildi")
+            
+            # Yangi session yaratish
+            TelegramSession.objects.create(
+                api_id=api_id,
+                api_hash=api_hash,
+                string_session=string_session,
+            )
+            logger.info("✅ Yangi Telegram session saqlandi")
+            
+            # Django User yaratish yoki topish
+            user, created = User.objects.get_or_create(
+                username=username,
+                defaults={
+                    'first_name': first_name,
+                    'last_name': last_name,
+                }
+            )
+            
+            # Agar user yangi bo'lsa, parol o'rnatish sahifasiga yo'naltirish
+            if created or not user.has_usable_password():
+                request.session['user_id_for_password'] = user.id
+                request.session.pop('tg_phone', None)
+                request.session.pop('tg_temp_session', None)
+                request.session.pop('tg_phone_code_hash', None)
+                
+                messages.success(request, "✅ Telegram orqali tasdiqlandi! Endi parol o'rnating.")
+                return redirect('set_password')
+            else:
+                # User mavjud va parol bor - login qilish
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                
+                # Session tozalash
+                request.session.pop('tg_phone', None)
+                request.session.pop('tg_temp_session', None)
+                request.session.pop('tg_phone_code_hash', None)
+                
+                messages.success(request, f"✅ Xush kelibsiz, {user.first_name or user.username}!")
+                return redirect('dashboard')
+            
+        except ValueError as ve:
+            messages.error(request, str(ve))
+            return render(request, 'telegram_auth_code.html', {'phone': phone})
+        except Exception as exc:
+            logger.error(f"❌ Kod xatosi: {exc}")
+            messages.error(request, f"❌ Kod noto'g'ri yoki eskirgan: {str(exc)}")
+            return render(request, 'telegram_auth_code.html', {'phone': phone})
+    
+    return render(request, 'telegram_auth_code.html', {'phone': phone})
+    """
+    Telegram auth - kod kiritish
+    """
+    phone = request.session.get('tg_phone')
+    temp_session = request.session.get('tg_temp_session')
+    phone_code_hash = request.session.get('tg_phone_code_hash')
+    
+    if not phone or not temp_session:
+        messages.error(request, "❌ Sessiya tugagan. Qaytadan boshlang.")
+        return redirect('telegram_auth_phone')
+    
+    if request.method == 'POST':
+        code = request.POST.get('code', '').strip()
+        password = request.POST.get('password', '').strip() or None
+        
+        if not code:
+            messages.error(request, "❌ Kodni kiriting!")
+            return render(request, 'telegram_auth_code.html', {'phone': phone})
+        
+        try:
+            logger.info(f"🔐 Kod tekshirilmoqda: {code}")
+            
+            # Telegram login tugallash
+            string_session, user_id, username, first_name, last_name = _run_async_in_thread(
+                _complete_phone_login(temp_session, phone, code, password, phone_code_hash)
+            )
+            
             # Telegram Session saqlash
             api_id = getattr(settings, 'TG_API_ID', '')
             api_hash = getattr(settings, 'TG_API_HASH', '')
